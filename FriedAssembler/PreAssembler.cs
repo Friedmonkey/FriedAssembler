@@ -8,6 +8,8 @@ namespace FriedAssembler;
 public class PreAssembler : AnalizerBase<char>
 {
     private static readonly string IncludeDataSegmentMarker = ";%includeData$egmentMarker%";
+    private static readonly string VaribleDataSegmentMarker = ";%varibleData$egmentMarker%";
+    private static readonly string TextCodeSegmentMarker = ";%textCode$egmentMarker%";
     public PreAssembler() : base('\0') { }
     public class Include 
     {
@@ -21,9 +23,12 @@ public class PreAssembler : AnalizerBase<char>
         public List<string> methods;
     }
     List<Include> Includes = new List<Include>();
+    string EntryCode = string.Empty;
+    string EntryName = string.Empty;
+    string Format = string.Empty;
     public string Parse(string input) 
     {
-        input = input + "\n #segment .reloc";
+        input = "\n" + input + "\n#segment .reloc";
         this.Analizable = input.ToList();
         this.Position = 0;
 
@@ -32,6 +37,27 @@ public class PreAssembler : AnalizerBase<char>
         this.Analizable = input.ToList();
         this.Position = 0;
 
+
+
+        input = EntryParser(input);
+        this.Analizable = input.ToList();
+        this.Position = 0;
+
+        input = EntryGenerator(input);
+        this.Analizable = input.ToList();
+        this.Position = 0;
+
+
+        input = FormatParser(input);
+        this.Analizable = input.ToList();
+        this.Position = 0;
+
+        input = FormatGenerator(input);
+        this.Analizable = input.ToList();
+        this.Position = 0;
+
+
+
         input = IncludePreParser(input);
         this.Analizable = input.ToList();
         this.Position = 0;
@@ -39,6 +65,16 @@ public class PreAssembler : AnalizerBase<char>
         input = IncludeGenerator(input);
         this.Analizable = input.ToList();
         this.Position = 0;
+
+
+
+        //input = VariblePreParser(input);
+        //this.Analizable = input.ToList();
+        //this.Position = 0;
+
+        //input = VaribleGenerator(input);
+        //this.Analizable = input.ToList();
+        //this.Position = 0;
 
 
         return input;
@@ -51,13 +87,13 @@ public class PreAssembler : AnalizerBase<char>
 
         while (Safe)
         {
-            if (Find("#segment "))
+            if (FindStart("#segment "))
             {
                 string segmentName = ConsumeUntilWhitespace().ToLower();
                 output += segmentName switch
                 {
-                    ".text" => "section '.text' code readable executable",
-                    ".data" => "section '.data' data readable writeable",
+                    ".text" => "section '.text' code readable executable \n" + TextCodeSegmentMarker,
+                    ".data" => "section '.data' data readable writeable \n" + VaribleDataSegmentMarker,
                     ".idata" => "section '.idata' import data readable writeable \n " + IncludeDataSegmentMarker,
                     ".reloc" => "section '.reloc' fixups data readable discardable\t; needed for Win32s",
                     _ => throw new Exception($"Segment `{segmentName}` Does not exist, did you mean `.text` or `.idata`?")
@@ -67,10 +103,89 @@ public class PreAssembler : AnalizerBase<char>
             Position++;
         }
 
+
+
+        return output;
+    }
+    private string EntryParser(string input)
+    {
+        string output = string.Empty;
+
+        while (Safe)
+        {
+            if (FindStart("entry "))
+            {
+                string entryName = TryConsumeUntil('(');
+                if (entryName is not null)
+                {
+                    Consume('(');
+                    Consume(')');
+                    SkipWhitespace();
+                    Consume('{');
+                    string code = ConsumeUntil('}');
+                    while (!Peek(-1).IsEnter())
+                    {
+                        //if the prevous character before the } was not an enter meaning it wasnt at the start of the line
+                        //so it was part of the code (somehow) 
+                        code += Consume('}');
+                        code += ConsumeUntil('}');
+                    }
+                    Consume('}');
+
+                    //we have captured the code
+                    EntryName = entryName;
+                    EntryCode = $"{entryName}:\n{code}";
+                }
+            }
+            output += Current;
+            Position++;
+        }
+
         return output;
     }
 
-    private string IncludePreParser(string input)
+    private string EntryGenerator(string input)
+    {
+        if (!string.IsNullOrEmpty(EntryName))
+        {
+            input = $"entry {EntryName}\n{input}";
+        }
+
+        if (input.Contains(TextCodeSegmentMarker))
+        {
+            return input.Replace(TextCodeSegmentMarker, EntryCode);
+        }
+        throw new Exception("Trying to write the entry method but the text code segment is missing, did you forgot to add `#segment .text` ?");
+        //return input.Replace(IncludeDataSegmentMarker, sb.ToString());
+    }
+
+    private string FormatParser(string input)
+    {
+        string output = string.Empty;
+
+        while (Safe)
+        {
+            if (FindStart("#format "))
+            {
+                Format = ConsumeUntilEnter();
+            }
+            output += Current;
+            Position++;
+        }
+
+        return output;
+    }
+    private string FormatGenerator(string input)
+    {
+        if (!string.IsNullOrEmpty(Format))
+        {
+            return $"format {Format}\n{input}";
+        }
+
+        return input;
+    }
+
+    private string ConstPreParser(string input)
     {
         if (!input.Contains(IncludeDataSegmentMarker))
         {
@@ -81,6 +196,56 @@ public class PreAssembler : AnalizerBase<char>
         while (Safe)
         {
             if (Find("#include "))
+            {
+                Include include = new Include();
+                include.methods = new List<string>();
+
+                Consume('<');
+                include.dll = ConsumeUntil('>');
+                Consume('>');
+                SkipWhitespace();
+                //we got the name now get all the methods
+                Consume('{');
+                do
+                {
+                    if (Current == ',') Consume(',');
+                    SkipWhitespace();
+                    Consume('[');
+                    string methodName = ConsumeUntil(']');
+                    include.methods.Add(methodName);
+                    Consume(']');
+                }
+                while (Current == ',');
+
+                SkipWhitespace();
+                Consume('}');
+
+                Include? sameDll = Includes.FirstOrDefault(i => i.dll.ToLower() == include.dll.ToLower());
+                if (sameDll is null)
+                {   //include doest exit yet, lets add it
+                    Includes.Add(include);
+                }
+                else
+                {   //include exists, lets add these methods
+                    sameDll.methods = sameDll.methods.Concat(include.methods).Distinct().ToList();
+                }
+            }
+            output += Current;
+            Position++; //we dont care about this, we keep it as it used to be
+        }
+        return output;
+    }
+    private string IncludePreParser(string input)
+    {
+        if (!input.Contains(IncludeDataSegmentMarker))
+        {
+            throw new Exception("Trying to include dlls but the imported data segment is missing, did you forgot to add `#segment .idata` ?");
+        }
+
+        string output = string.Empty;
+        while (Safe)
+        {
+            if (FindStart("#include "))
             {
                 Include include = new Include();
                 include.methods = new List<string>();
@@ -180,11 +345,33 @@ public class PreAssembler : AnalizerBase<char>
         }
         return consumed;
     }
+    public string ConsumeUntilEnter()
+    {
+        string consumed = string.Empty;
+        while (Safe && !Current.IsEnter())
+        {
+            consumed += Current;
+            Position++;
+        }
+        return consumed;
+    }
     public string ConsumeUntil(char stop)
     {
         string consumed = string.Empty;
         while (Safe && Current != stop)
         {
+            consumed += Current;
+            Position++;
+        }
+        return consumed;
+    }
+    public string TryConsumeUntil(char stop)
+    {
+        string consumed = string.Empty;
+        while (Safe && Current != stop)
+        {
+            if (Current.IsEnter()) return null;
+
             consumed += Current;
             Position++;
         }
@@ -197,10 +384,23 @@ public class PreAssembler : AnalizerBase<char>
             Position++;
         }
     }
-    public void Consume(char character)
+    public int ConsumeWhitespace()
+    {
+        int skipped = 0;
+        while (Safe && char.IsWhiteSpace(Current))
+        {
+            Position++;
+            skipped++;
+        }
+        return skipped;
+    }
+    public char Consume(char character)
     {
         if (Current == character)
+        { 
             Position++;
+            return character;
+        }
         else
             throw new Exception($"Expected `{character}` got `{Current}` instead.");
     }
@@ -216,5 +416,31 @@ public class PreAssembler : AnalizerBase<char>
         }
         Position += find.Length;
         return true;
+    }
+
+    public bool FindStart(string find)
+    {
+        if (Find(find))
+        {
+            int length = find.Length+1;
+            if (Peek(-length).IsEnter())
+            {
+                return true;
+            }
+            else
+            {
+                Console.WriteLine($"`{find}` found, but was not at the start of a line");
+                Position -= find.Length;
+                return false;
+            }
+        }
+        return false;
+    }
+}
+public static class CharExtention
+{
+    public static bool IsEnter(this char character)
+    {
+        return character is '\n' or '\r';
     }
 }

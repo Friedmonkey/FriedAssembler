@@ -9,43 +9,43 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        string code = """
-        #include <user32.dll>
-        {
-            [MessageBoxA]
-        }
-        #include <msvcrt.dll>
-        {
-            [printf]
-        }
-        #include <kernel32.dll>
-        {
-            [ExitProcess]
-        }
+        //string code = """
+        //#include <user32.dll>
+        //{
+        //    [MessageBoxA]
+        //}
+        //#include <msvcrt.dll>
+        //{
+        //    [printf]
+        //}
+        //#include <kernel32.dll>
+        //{
+        //    [ExitProcess]
+        //}
 
-        format PE console
-        entry main
+        //format PE console
+        //entry main
 
-        #segment .text
-        main:
-            ; Set up parameters for printf
-            push message ; Push address of the message string (parameter)
-            push format_string ; Push address of the format string
-            call [printf]       ; Call printf
+        //#segment .text
+        //main:
+        //    ; Set up parameters for printf
+        //    push message ; Push address of the message string (parameter)
+        //    push format_string ; Push address of the format string
+        //    call [printf]       ; Call printf
 
-            ; Exit the program
-            push 0              ; Exit code 0
-            call [ExitProcess]  ; Call ExitProcess
+        //    ; Exit the program
+        //    push 0              ; Exit code 0
+        //    call [ExitProcess]  ; Call ExitProcess
 
-        #segment .data
-        format_string db '%s',0   ; Format string for printf (prints a string)
-        message db 'hello world',0 ; Message to print
+        //#segment .data
+        //format_string db '%s',0   ; Format string for printf (prints a string)
+        //message db 'hello world',0 ; Message to print
 
-        #segment .idata
+        //#segment .idata
         
-        """;
+        //""";
 
-        File.WriteAllText("input.flasm", code);
+        //File.WriteAllText("input.flasm", code);
 
 
         try
