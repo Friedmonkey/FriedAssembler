@@ -10,10 +10,8 @@ internal class Program
     static void Main(string[] args)
     {
         //string code = """
-        //#include <user32.dll>
-        //{
-        //    [MessageBoxA]
-        //}
+        //#format PE console
+
         //#include <msvcrt.dll>
         //{
         //    [printf]
@@ -23,25 +21,18 @@ internal class Program
         //    [ExitProcess]
         //}
 
-        //format PE console
-        //entry main
+        //const byte print_message = "Hello world!";
+        //const byte print_format = "%s";
 
-        //#segment .text
-        //main:
-        //    ; Set up parameters for printf
-        //    push message ; Push address of the message string (parameter)
-        //    push format_string ; Push address of the format string
-        //    call [printf]       ; Call printf
+        //entry main()
+        //{
+        //    push print_message
+        //    push print_format
+        //    call [printf]
 
-        //    ; Exit the program
-        //    push 0              ; Exit code 0
-        //    call [ExitProcess]  ; Call ExitProcess
-
-        //#segment .data
-        //format_string db '%s',0   ; Format string for printf (prints a string)
-        //message db 'hello world',0 ; Message to print
-
-        //#segment .idata
+        //    push 0
+        //    call [ExitProcess]
+        //}
         
         //""";
 
