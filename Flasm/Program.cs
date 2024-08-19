@@ -3,7 +3,7 @@ using Reloaded.Assembler.Definitions;
 using System.Diagnostics;
 using FriedAssembler;
 
-namespace Frasm;
+namespace Flasm;
 
 internal class Program
 {

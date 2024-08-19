@@ -5,7 +5,7 @@ VisualStudioVersion = 17.10.34928.147
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FriedAssembler", "FriedAssembler\FriedAssembler.csproj", "{75F01560-4A5B-47F5-B1A5-BA70F07B6590}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Frasm", "Frasm\Frasm.csproj", "{5C7C755E-A251-4633-BE20-90D1FBD0E303}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flasm", "Flasm\Flasm.csproj", "{5C7C755E-A251-4633-BE20-90D1FBD0E303}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
