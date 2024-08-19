@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using static FriedAssembler.PreAssembler;
 
@@ -26,9 +27,25 @@ public class PreAssembler : AnalizerBase<char>
     string EntryCode = string.Empty;
     string EntryName = string.Empty;
     string Format = string.Empty;
+
+    public class Varible
+    {
+        public Varible() { }
+        public Varible(string name, string type, string value)
+        {
+            this.name = name;
+            this.type = type;
+            this.value = value;
+        }
+        public string name;
+        public string type;
+        public string value;
+    }
+    List<Varible> Varibles = new List<Varible>();
+
     public string Parse(string input) 
     {
-        input = "\n" + input + "\n#segment .reloc";
+        input = "\n" + input;
         this.Analizable = input.ToList();
         this.Position = 0;
 
@@ -68,13 +85,13 @@ public class PreAssembler : AnalizerBase<char>
 
 
 
-        //input = VariblePreParser(input);
-        //this.Analizable = input.ToList();
-        //this.Position = 0;
+        input = VariblePreParser(input);
+        this.Analizable = input.ToList();
+        this.Position = 0;
 
-        //input = VaribleGenerator(input);
-        //this.Analizable = input.ToList();
-        //this.Position = 0;
+        input = VaribleGenerator(input);
+        this.Analizable = input.ToList();
+        this.Position = 0;
 
 
         return input;
@@ -84,26 +101,46 @@ public class PreAssembler : AnalizerBase<char>
     private string SegmentParser(string input) 
     {
         string output = string.Empty;
+        List<string> FoundFormats = new List<string>();
+        void AddSegment(string segmentName)
+        {
+            output += segmentName switch
+            {
+                ".text" => "section '.text' code readable executable \n" + TextCodeSegmentMarker,
+                ".data" => "section '.data' data readable writeable \n" + VaribleDataSegmentMarker,
+                ".idata" => "section '.idata' import data readable writeable \n" + IncludeDataSegmentMarker,
+                ".reloc" => "section '.reloc' fixups data readable discardable\t; needed for Win32s",
+                _ => throw new Exception($"Segment `{segmentName}` Does not exist, did you mean `.text` or `.idata`?")
+            };
+            FoundFormats.Add(segmentName);
+        }
+
 
         while (Safe)
         {
             if (FindStart("#segment "))
             {
                 string segmentName = ConsumeUntilWhitespace().ToLower();
-                output += segmentName switch
-                {
-                    ".text" => "section '.text' code readable executable \n" + TextCodeSegmentMarker,
-                    ".data" => "section '.data' data readable writeable \n" + VaribleDataSegmentMarker,
-                    ".idata" => "section '.idata' import data readable writeable \n " + IncludeDataSegmentMarker,
-                    ".reloc" => "section '.reloc' fixups data readable discardable\t; needed for Win32s",
-                    _ => throw new Exception($"Segment `{segmentName}` Does not exist, did you mean `.text` or `.idata`?")
-                };
+                AddSegment(segmentName);
             }
             output += Current;
             Position++;
         }
 
+        void AddSegmentIfMissing(string seg) 
+        {
+            if (!FoundFormats.Contains(seg))
+            {
+                output += "\n";
+                AddSegment(seg);
+                output += "\n";
+            }
+        }
 
+        AddSegmentIfMissing(".text");
+        AddSegmentIfMissing(".data");
+        AddSegmentIfMissing(".idata");
+        AddSegmentIfMissing(".reloc");
 
         return output;
     }
@@ -185,55 +222,89 @@ public class PreAssembler : AnalizerBase<char>
         return input;
     }
 
-    private string ConstPreParser(string input)
+    private string VariblePreParser(string input)
     {
-        if (!input.Contains(IncludeDataSegmentMarker))
+        if (!input.Contains(VaribleDataSegmentMarker))
         {
-            throw new Exception("Trying to include dlls but the imported data segment is missing, did you forgot to add `#segment .idata` ?");
+            throw new Exception("Trying to use varibles but the varibles data segment is missing, did you forgot to add `#segment .data` ?");
         }
 
         string output = string.Empty;
         while (Safe)
         {
-            if (Find("#include "))
+            if (FindStart("const "))
             {
-                Include include = new Include();
-                include.methods = new List<string>();
+                Varible varible = new Varible();
 
-                Consume('<');
-                include.dll = ConsumeUntil('>');
-                Consume('>');
-                SkipWhitespace();
-                //we got the name now get all the methods
-                Consume('{');
-                do
+                varible.type = ConsumeUntilWhitespace();
+                ConsumeWhitespace();
+                varible.name = ConsumeUntilWhitespace();
+                ConsumeWhitespace();
+                Consume('=');
+                ConsumeWhitespace();
+                if (Current == '"') //we add real strings with automatically zero terminate
                 {
-                    if (Current == ',') Consume(',');
-                    SkipWhitespace();
-                    Consume('[');
-                    string methodName = ConsumeUntil(']');
-                    include.methods.Add(methodName);
-                    Consume(']');
-                }
-                while (Current == ',');
+                    Consume('"');
+                    varible.value = "'";
+                    varible.value += TryConsumeUntil('"');
+                    if (Current == '"')
+                    {
+                        Consume('"');
+                    }
+                    else
+                    {
+                        throw new Exception("Unterminated string, string is missing an ending quote");
+                    }
 
-                SkipWhitespace();
-                Consume('}');
-
-                Include? sameDll = Includes.FirstOrDefault(i => i.dll.ToLower() == include.dll.ToLower());
-                if (sameDll is null)
-                {   //include doest exit yet, lets add it
-                    Includes.Add(include);
+                    varible.value += "',0";
+                    //if (Current == ';') Consume(';');
                 }
                 else
-                {   //include exists, lets add these methods
-                    sameDll.methods = sameDll.methods.Concat(include.methods).Distinct().ToList();
+                {
+                    varible.value = ConsumeUntilEnter();
+                }
+
+
+                Varible? sameVarible = Varibles.FirstOrDefault(i => i.name == varible.name);
+                if (sameVarible is null)
+                {   //varible doest exit yet, lets add it
+                    Varibles.Add(varible);
+                }
+                else
+                {   //varible exists, lets let the user know
+                    throw new Exception($"the varible `{varible.name}` already exists");
                 }
             }
             output += Current;
             Position++; //we dont care about this, we keep it as it used to be
         }
         return output;
+    }
+
+    private string VaribleGenerator(string input)
+    {
+        StringBuilder sb = new StringBuilder();
+        foreach (var varible in Varibles)
+        {
+            //string type = "d" + (varible.type.ToLower()).First();
+            ////from "byte" to "db" and from "word" to "dw"
+            string type = varible.type.ToLower() switch
+            {
+                "byte" => "db",
+                "word" => "dw",
+                _ => varible.type,
+            };
+            //from "byte" to "db" and from "word" to "dw"
+            sb.AppendLine($"\t{varible.name} {type} {varible.value}");
+        }
+        
+        if (input.Contains(VaribleDataSegmentMarker))
+        {
+            string compiled = sb.ToString();
+            return input.Replace(VaribleDataSegmentMarker, compiled);
+        }
+        throw new Exception("Trying to add varibles but the varible data segment is missing, did you forgot to add `#segment .data` ?");
+        //return input.Replace(IncludeDataSegmentMarker, sb.ToString());
     }
     private string IncludePreParser(string input)
     {
