@@ -317,9 +317,10 @@ public class PreAssembler : AnalizerBase<char>
                         Consume('"');
                         varible.value += "',0";
                         varible.value = varible.value
-                            .Replace("\\n","',10,'")
-                            .Replace("\\\\","',92,'")
-                            .Replace(",'',", ",");
+                            .Replace("\\n", "',10,'")
+                            .Replace("\\\\", "',92,'")
+                            .Replace(",'',", ",")
+                            .Replace("'',", "");
                     }
                     else
                     {
