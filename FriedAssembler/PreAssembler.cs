@@ -10,6 +10,7 @@ public class PreAssembler : AnalizerBase<char>
 {
     private static readonly string IncludeDataSegmentMarker = ";%includeData$egmentMarker%";
     private static readonly string MutableDataSegmentMarker = ";%mutableData$egmentMarker%";
+    private static readonly string BufferDataSegmentMarker = ";%bufferData$egmentMarker%";
     private static readonly string ConstDataSegmentMarker = ";%constData$egmentMarker%";
     private static readonly string TextCodeSegmentMarker = ";%textCode$egmentMarker%";
     public PreAssembler() : base('\0') { }
@@ -32,23 +33,25 @@ public class PreAssembler : AnalizerBase<char>
     public class Varible
     {
         public Varible() { }
-        public Varible(string name, string type, string value, bool constant)
+        public Varible(string name, string type, string value, bool constant, bool initialized)
         {
             this.name = name;
             this.type = type;
             this.value = value;
             this.constant = constant;
+            this.initialized = initialized;
         }
         public string name;
         public string type;
         public string value;
         public bool constant = false;
+        public bool initialized = false;
     }
     List<Varible> Varibles = new List<Varible>();
 
     public string Parse(string input) 
     {
-        input = "\n" + input;
+        input = "\n" + input + "\n";
         this.Analizable = input.ToList();
         this.Position = 0;
 
@@ -111,6 +114,7 @@ public class PreAssembler : AnalizerBase<char>
             {
                 ".text" => "section '.text' code readable executable \n" + TextCodeSegmentMarker,
                 ".data" => "section '.data' data readable writeable \n" + MutableDataSegmentMarker,
+                ".bss" => "section '.bss' readable writeable \n" + BufferDataSegmentMarker,
                 ".cdata" => "section '.cdata' data readable \n" + ConstDataSegmentMarker,
                 ".idata" => "section '.idata' import data readable writeable \n" + IncludeDataSegmentMarker,
                 ".reloc" => "section '.reloc' fixups data readable discardable\t; needed for Win32s",
@@ -130,6 +134,7 @@ public class PreAssembler : AnalizerBase<char>
             output += Current;
             Position++;
         }
+        output += "\n";
 
         void AddSegmentIfMissing(string seg) 
         {
@@ -142,8 +147,9 @@ public class PreAssembler : AnalizerBase<char>
         }
 
         AddSegmentIfMissing(".text");
-        AddSegmentIfMissing(".data");
-        AddSegmentIfMissing(".cdata");
+        //AddSegmentIfMissing(".data");
+        //AddSegmentIfMissing(".bss");
+        //AddSegmentIfMissing(".cdata");
         AddSegmentIfMissing(".idata");
         AddSegmentIfMissing(".reloc");
 
@@ -229,32 +235,43 @@ public class PreAssembler : AnalizerBase<char>
 
     private string VariblePreParser(string input)
     {
-        if (!input.Contains(MutableDataSegmentMarker))
-        {
-            throw new Exception("Trying to use varibles but the varibles data segment is missing, did you forgot to add `#segment .data` ?");
-        }
+        //if (!input.Contains(MutableDataSegmentMarker))
+        //{
+        //    throw new Exception("Trying to use varibles but the varibles data segment is missing, did you forgot to add `#segment .data` ?");
+        //}
 
         string output = string.Empty;
         while (Safe)
         {
             bool found = false;
             bool constant = false;
+            bool initialized = false;
             if (FindStart("const "))
             { 
                 found = true;
                 constant = true;
+                initialized = true;
             }
 
             if (FindStart("mutable "))
             {
                 found = true;
                 constant = false;
+                initialized = true;
+            }
+
+            if (FindStart("buffer "))
+            {
+                found = true;
+                constant = false;
+                initialized = false;
             }
 
             if (found)
             {
                 Varible varible = new Varible();
                 varible.constant = constant;
+                varible.initialized = initialized;
                 varible.type = ConsumeUntilWhitespace();
                 ConsumeWhitespace();
                 varible.name = ConsumeUntilWhitespace();
@@ -265,19 +282,43 @@ public class PreAssembler : AnalizerBase<char>
                 {
                     Consume('"');
                     varible.value = "'";
+                    //varible.value += TryConsumeUntil('\\');
+                    //switch (Peek(1))
+                    //{
+                    //    case 'n':
+                    //        varible.value += "',10,'";
+                    //        break;
+                    //    case '\\':
+                    //        varible.value += "',92,'";
+                    //        break;
+                    //    default:
+                    //        break;
+                    //}
                     varible.value += TryConsumeUntil('"');
                     if (Current == '"')
                     {
                         Consume('"');
+                        varible.value += "',0";
+                        varible.value = varible.value
+                            .Replace("\\n","',10,'")
+                            .Replace("\\\\","',92,'")
+                            .Replace(",'',", ",");
                     }
                     else
                     {
                         throw new Exception("Unterminated string, string is missing an ending quote");
                     }
 
-                    varible.value += "',0";
                     //if (Current == ';') Consume(';');
                 }
+                //else if (Find("void"))
+                //{
+                //    if (constant)
+                //    {
+                //        throw new Exception("constant cannot be uninitalized");
+                //    }
+                //    varible.value = null; // mark as uninitialized
+                //}
                 else
                 {
                     varible.value = ConsumeUntilEnter();
@@ -304,14 +345,18 @@ public class PreAssembler : AnalizerBase<char>
     {
         StringBuilder constantSB = new StringBuilder();
         StringBuilder mutableSB = new StringBuilder();
+        StringBuilder bufferSB = new StringBuilder();
         foreach (var varible in Varibles)
         {
             //string type = "d" + (varible.type.ToLower()).First();
             ////from "byte" to "db" and from "word" to "dw"
+            string prefix = varible.initialized ? "d" : "r"; //declare for initalized or reserve for buffers
             string type = varible.type.ToLower() switch
             {
-                "byte" => "db",
-                "word" => "dw",
+                "byte" => prefix+"b",
+                "word" => prefix+"w",
+                "dword" => prefix+"d",
+                "qword" => prefix+"q",
                 _ => varible.type,
             };
             //from "byte" to "db" and from "word" to "dw"
@@ -320,22 +365,39 @@ public class PreAssembler : AnalizerBase<char>
             {
                 constantSB.AppendLine(line);
             }
-            else
+            else if (!varible.initialized)
             { 
+                bufferSB.AppendLine(line);
+            }
+            else
+            {
                 mutableSB.AppendLine(line);
             }
         }
-        
-        if (input.Contains(MutableDataSegmentMarker) && input.Contains(ConstDataSegmentMarker))
-        {
-            string constants = constantSB.ToString();
-            string mutables = mutableSB.ToString();
 
-            return input
-                .Replace(MutableDataSegmentMarker, mutables)
-                .Replace(ConstDataSegmentMarker, constants);
+        string mutables = mutableSB.ToString();
+        string constants = constantSB.ToString();
+        string buffers = bufferSB.ToString();
+
+        if (!string.IsNullOrEmpty(mutables) && !input.Contains(MutableDataSegmentMarker))
+        {
+            throw new Exception(".data segment missing");
         }
-        throw new Exception("Trying to add varibles but the varible data segment is missing, did you forgot to add `#segment .data` or `#segment .cdata` ?");
+        if (!string.IsNullOrEmpty(constants) && !input.Contains(ConstDataSegmentMarker))
+        {
+            throw new Exception(".cdata segment missing");
+        }
+        if (!string.IsNullOrEmpty(buffers) && !input.Contains(BufferDataSegmentMarker))
+        {
+            throw new Exception(".bss segment missing");
+        }
+
+        return input
+            .Replace(MutableDataSegmentMarker, mutables)
+            .Replace(ConstDataSegmentMarker, constants)
+            .Replace(BufferDataSegmentMarker, buffers);
+
+        //throw new Exception("Trying to add varibles but the varible data segment is missing, did you forgot to add `#segment .data` or `#segment .cdata` ?");
         //return input.Replace(IncludeDataSegmentMarker, sb.ToString());
     }
     private string IncludePreParser(string input)
