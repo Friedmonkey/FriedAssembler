@@ -76,6 +76,7 @@ const byte print_message = '#include ',0
 const word print_format = "%s"
 
 then we can do this to print hello world
+```
 entry main()
 {
     push print_message
@@ -85,6 +86,7 @@ entry main()
     push 0
     call [ExitProcess]
 }
+```
 
 because of how the stack works you put the arguments on the stack in reverse order
 so `printf("%s", print_message);` in c, you would have to put the message first because itll be popped of the stack last
