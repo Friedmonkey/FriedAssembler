@@ -9,7 +9,8 @@ namespace FriedAssembler;
 public class PreAssembler : AnalizerBase<char>
 {
     private static readonly string IncludeDataSegmentMarker = ";%includeData$egmentMarker%";
-    private static readonly string VaribleDataSegmentMarker = ";%varibleData$egmentMarker%";
+    private static readonly string MutableDataSegmentMarker = ";%mutableData$egmentMarker%";
+    private static readonly string ConstDataSegmentMarker = ";%constData$egmentMarker%";
     private static readonly string TextCodeSegmentMarker = ";%textCode$egmentMarker%";
     public PreAssembler() : base('\0') { }
     public class Include 
@@ -31,15 +32,17 @@ public class PreAssembler : AnalizerBase<char>
     public class Varible
     {
         public Varible() { }
-        public Varible(string name, string type, string value)
+        public Varible(string name, string type, string value, bool constant)
         {
             this.name = name;
             this.type = type;
             this.value = value;
+            this.constant = constant;
         }
         public string name;
         public string type;
         public string value;
+        public bool constant = false;
     }
     List<Varible> Varibles = new List<Varible>();
 
@@ -107,7 +110,8 @@ public class PreAssembler : AnalizerBase<char>
             output += segmentName switch
             {
                 ".text" => "section '.text' code readable executable \n" + TextCodeSegmentMarker,
-                ".data" => "section '.data' data readable writeable \n" + VaribleDataSegmentMarker,
+                ".data" => "section '.data' data readable writeable \n" + MutableDataSegmentMarker,
+                ".cdata" => "section '.cdata' data readable \n" + ConstDataSegmentMarker,
                 ".idata" => "section '.idata' import data readable writeable \n" + IncludeDataSegmentMarker,
                 ".reloc" => "section '.reloc' fixups data readable discardable\t; needed for Win32s",
                 _ => throw new Exception($"Segment `{segmentName}` Does not exist, did you mean `.text` or `.idata`?")
@@ -139,6 +143,7 @@ public class PreAssembler : AnalizerBase<char>
 
         AddSegmentIfMissing(".text");
         AddSegmentIfMissing(".data");
+        AddSegmentIfMissing(".cdata");
         AddSegmentIfMissing(".idata");
         AddSegmentIfMissing(".reloc");
 
@@ -224,7 +229,7 @@ public class PreAssembler : AnalizerBase<char>
 
     private string VariblePreParser(string input)
     {
-        if (!input.Contains(VaribleDataSegmentMarker))
+        if (!input.Contains(MutableDataSegmentMarker))
         {
             throw new Exception("Trying to use varibles but the varibles data segment is missing, did you forgot to add `#segment .data` ?");
         }
@@ -232,10 +237,24 @@ public class PreAssembler : AnalizerBase<char>
         string output = string.Empty;
         while (Safe)
         {
+            bool found = false;
+            bool constant = false;
             if (FindStart("const "))
+            { 
+                found = true;
+                constant = true;
+            }
+
+            if (FindStart("mutable "))
+            {
+                found = true;
+                constant = false;
+            }
+
+            if (found)
             {
                 Varible varible = new Varible();
-
+                varible.constant = constant;
                 varible.type = ConsumeUntilWhitespace();
                 ConsumeWhitespace();
                 varible.name = ConsumeUntilWhitespace();
@@ -283,7 +302,8 @@ public class PreAssembler : AnalizerBase<char>
 
     private string VaribleGenerator(string input)
     {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder constantSB = new StringBuilder();
+        StringBuilder mutableSB = new StringBuilder();
         foreach (var varible in Varibles)
         {
             //string type = "d" + (varible.type.ToLower()).First();
@@ -295,15 +315,27 @@ public class PreAssembler : AnalizerBase<char>
                 _ => varible.type,
             };
             //from "byte" to "db" and from "word" to "dw"
-            sb.AppendLine($"\t{varible.name} {type} {varible.value}");
+            string line = $"\t{varible.name} {type} {varible.value}";
+            if (varible.constant)
+            {
+                constantSB.AppendLine(line);
+            }
+            else
+            { 
+                mutableSB.AppendLine(line);
+            }
         }
         
-        if (input.Contains(VaribleDataSegmentMarker))
+        if (input.Contains(MutableDataSegmentMarker) && input.Contains(ConstDataSegmentMarker))
         {
-            string compiled = sb.ToString();
-            return input.Replace(VaribleDataSegmentMarker, compiled);
+            string constants = constantSB.ToString();
+            string mutables = mutableSB.ToString();
+
+            return input
+                .Replace(MutableDataSegmentMarker, mutables)
+                .Replace(ConstDataSegmentMarker, constants);
         }
-        throw new Exception("Trying to add varibles but the varible data segment is missing, did you forgot to add `#segment .data` ?");
+        throw new Exception("Trying to add varibles but the varible data segment is missing, did you forgot to add `#segment .data` or `#segment .cdata` ?");
         //return input.Replace(IncludeDataSegmentMarker, sb.ToString());
     }
     private string IncludePreParser(string input)
