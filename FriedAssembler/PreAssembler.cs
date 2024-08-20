@@ -360,16 +360,18 @@ public class PreAssembler : AnalizerBase<char>
     private string IncludeGenerator(string input)
     {
         StringBuilder sb = new StringBuilder();
-        sb.AppendLine(";the import table");
+        sb.AppendLine("\t;the import table");
         foreach (var include in Includes)
         {
             string dll = include.dll.Split('.').First().ToLower();
             sb.AppendLine($"\tdd 0,0,0,RVA flasm_include_{dll}_name,RVA flasm_include_{dll}_table");
         }
         sb.AppendLine("\tdd 0,0,0,0,0");
+        sb.AppendLine("\n");
 
 
-        sb.AppendLine(";table declarations");
+
+        sb.AppendLine("\t;table declarations");
         foreach (var include in Includes)
         {
             string dll = include.dll.Split('.').First().ToLower();
@@ -378,24 +380,27 @@ public class PreAssembler : AnalizerBase<char>
             {
                 sb.AppendLine($"\t{method} dd RVA flasm_include_{method}");
             }
-            sb.AppendLine($"\tdd 0                                      ; End of table");
+            sb.AppendLine($"\tdd 0  ; End of table");
         }
+        sb.AppendLine("\n");
 
-        sb.AppendLine(";include declarations");
+
+        sb.AppendLine("\t;include declarations");
         foreach (var include in Includes) 
         {
             string dll = include.dll.Split('.').First().ToLower();
-            sb.AppendLine($"flasm_include_{dll}_name db '{include.dll}',0");
+            sb.AppendLine($"\tflasm_include_{dll}_name db '{include.dll}',0");
         }
+        sb.AppendLine("\n");
 
 
-        sb.AppendLine(";method declarations");
+        sb.AppendLine("\t;method declarations");
         foreach (var include in Includes)
         {
             foreach (var method in include.methods)
             {
-                sb.AppendLine($"flasm_include_{method} dw 0");
-                sb.AppendLine($"\tdb '{method}',0");
+                sb.AppendLine($"\tflasm_include_{method} dw 0");
+                sb.AppendLine($"\t\tdb '{method}',0");
             }
         }
         if (input.Contains(IncludeDataSegmentMarker))

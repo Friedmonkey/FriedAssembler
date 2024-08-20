@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FriedAssembler", "FriedAsse
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Flasm", "Flasm\Flasm.csproj", "{5C7C755E-A251-4633-BE20-90D1FBD0E303}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FriedCompiler", "FriedCompiler\FriedCompiler.csproj", "{6F465CDA-7A9C-4217-96B1-CADCB8316473}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{5C7C755E-A251-4633-BE20-90D1FBD0E303}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5C7C755E-A251-4633-BE20-90D1FBD0E303}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5C7C755E-A251-4633-BE20-90D1FBD0E303}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F465CDA-7A9C-4217-96B1-CADCB8316473}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F465CDA-7A9C-4217-96B1-CADCB8316473}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F465CDA-7A9C-4217-96B1-CADCB8316473}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F465CDA-7A9C-4217-96B1-CADCB8316473}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
