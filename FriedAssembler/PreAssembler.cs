@@ -30,6 +30,11 @@ public class PreAssembler : AnalizerBase<char>
     string EntryName = string.Empty;
     string Format = string.Empty;
 
+    bool useMutable = false;
+    bool useConst = false;
+    bool useBuffer = false;
+    bool useIncludes = false;
+
     public class Varible
     {
         public Varible() { }
@@ -54,6 +59,16 @@ public class PreAssembler : AnalizerBase<char>
         input = "\n" + input + "\n";
         this.Analizable = input.ToList();
         this.Position = 0;
+
+        input = IncludePreParser(input);
+        this.Analizable = input.ToList();
+        this.Position = 0;
+
+
+        input = VariblePreParser(input);
+        this.Analizable = input.ToList();
+        this.Position = 0;
+
 
         //we always parse segments
         input = SegmentParser(input);
@@ -80,25 +95,14 @@ public class PreAssembler : AnalizerBase<char>
         this.Position = 0;
 
 
-
-        input = IncludePreParser(input);
-        this.Analizable = input.ToList();
-        this.Position = 0;
-
         input = IncludeGenerator(input);
         this.Analizable = input.ToList();
         this.Position = 0;
 
 
-
-        input = VariblePreParser(input);
-        this.Analizable = input.ToList();
-        this.Position = 0;
-
         input = VaribleGenerator(input);
         this.Analizable = input.ToList();
         this.Position = 0;
-
 
         return input;
     }
@@ -147,10 +151,17 @@ public class PreAssembler : AnalizerBase<char>
         }
 
         AddSegmentIfMissing(".text");
-        //AddSegmentIfMissing(".data");
-        //AddSegmentIfMissing(".bss");
-        //AddSegmentIfMissing(".cdata");
-        AddSegmentIfMissing(".idata");
+
+        if (useMutable)
+            AddSegmentIfMissing(".data");
+        if (useBuffer)
+            AddSegmentIfMissing(".bss");
+        if (useConst)
+            AddSegmentIfMissing(".cdata");
+
+        if (useIncludes)
+            AddSegmentIfMissing(".idata");
+
         AddSegmentIfMissing(".reloc");
 
         return output;
@@ -251,6 +262,8 @@ public class PreAssembler : AnalizerBase<char>
                 found = true;
                 constant = true;
                 initialized = true;
+
+                useConst = true;
             }
 
             if (FindStart("mutable "))
@@ -258,6 +271,8 @@ public class PreAssembler : AnalizerBase<char>
                 found = true;
                 constant = false;
                 initialized = true;
+
+                useMutable = true;
             }
 
             if (FindStart("buffer "))
@@ -265,6 +280,8 @@ public class PreAssembler : AnalizerBase<char>
                 found = true;
                 constant = false;
                 initialized = false;
+
+                useBuffer = true;
             }
 
             if (found)
@@ -402,16 +419,17 @@ public class PreAssembler : AnalizerBase<char>
     }
     private string IncludePreParser(string input)
     {
-        if (!input.Contains(IncludeDataSegmentMarker))
-        {
-            throw new Exception("Trying to include dlls but the imported data segment is missing, did you forgot to add `#segment .idata` ?");
-        }
+        //if (!input.Contains(IncludeDataSegmentMarker))
+        //{
+        //    throw new Exception("Trying to include dlls but the imported data segment is missing, did you forgot to add `#segment .idata` ?");
+        //}
 
         string output = string.Empty;
         while (Safe)
         {
             if (FindStart("#include "))
             {
+                useIncludes = true;
                 Include include = new Include();
                 include.methods = new List<string>();
 
