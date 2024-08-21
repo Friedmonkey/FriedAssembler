@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fbuild", "Fbuild\Fbuild.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FriedCompiler", "FriedCompiler\FriedCompiler.csproj", "{6F465CDA-7A9C-4217-96B1-CADCB8316473}"
 EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "FbuildSetup", "FbuildSetup\FbuildSetup.vdproj", "{B0F0F81B-4CCC-4F27-B8E4-D2C9F0CC397A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,8 @@ Global
 		{6F465CDA-7A9C-4217-96B1-CADCB8316473}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F465CDA-7A9C-4217-96B1-CADCB8316473}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F465CDA-7A9C-4217-96B1-CADCB8316473}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0F0F81B-4CCC-4F27-B8E4-D2C9F0CC397A}.Debug|Any CPU.ActiveCfg = Debug
+		{B0F0F81B-4CCC-4F27-B8E4-D2C9F0CC397A}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
