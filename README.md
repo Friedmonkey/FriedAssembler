@@ -22,17 +22,20 @@ the predefined segments are
 
 `#segment .text` this is where all of your executable code is stored
 `#segment .data` this is where your mutable data is stored
+`#segment .bss` this is where your buffer data is stored
 `#segment .cdata` this is where your constant data is stored
 `#segment .idata` this is where your includes/imports are stored
 
-all of these segments will be present
-if you dont add them youself, they will be added automatically
+if the segments are needed, they will automatically be added
 usaully you dont have to define them, unless youll manually be adding stuff to them
 using `const byte print_message = "Hello World";`
 will allocate this null termminated string and the pointer to the first character will be the label 'print_message' (im just trying to use fancy words to say that this string will be inside the exe file which you can use using the label)
 and it will put this under #segment .cdata for constant data
 using `mutable byte console_input = "";`
-will make one you can mutate (i think)
+will make one you can mutate
+
+but if it doest need any initial value its better to make it int a buffer
+`buffer byte console_input = 256;` will reserve some space for your 256 bytes, this is more efficient, because it wont be stored in the executable file because it is uninitialized itll all be filled with zeros and you're more explicit about the size making it easier to notice buffer overflows, which will probally happen lol
 
 also in assembly you use character arrays to store strings, and they're null terminated
 so it would be 'hello world',0
@@ -56,7 +59,8 @@ if there were multiple it would look liek this (i heavent even tested this yet)
 {
     [print],
     [printf],
-    [fprintf]
+    [fprintf],
+    [scanf]
 }
 ```
 and per assembly if you wanted to call them, you first put the arguments on the stack and then call it
@@ -73,7 +77,7 @@ entry main()
 here you also see how you can call external included methods in assembly
 so lets say we have this
 const byte print_message = '#include ',0
-const word print_format = "%s"
+const byte print_format = "%s"
 
 then we can do this to print hello world
 ```
@@ -111,7 +115,7 @@ heres the full hello world file
 }
 
 const byte print_message = "hello world"
-const word print_format = "%s"
+const byte print_format = "%s"
 
 entry main()
 {
@@ -183,3 +187,96 @@ flasm_include_kernel32_table:
 ```
 
 i hope that is enough documentation, if you have any questions, try to contact me somehow
+
+ive since changed some things so here is an example wich has a 6 byte buffer you can easily overflow
+
+```
+#format PE console
+
+#include <msvcrt.dll>
+{
+    [printf],
+    [scanf]
+}
+#include <kernel32.dll>
+{
+    [ExitProcess]
+}
+
+const byte newline = "\n";
+const byte console_format = "%s";
+const dword init_value = "ABC";
+const byte display_text1 = "The varible contains the following: \n";
+const byte display_text2 = "Enter a text please into our 6 byte buffer :)\nplease dont exeed out 6 byte limit pls\n>";
+const byte display_text3 = "The varible now contains:\n";
+
+buffer byte console_input = 6;
+buffer dword affectedTest = 4;
+
+
+
+
+entry main()
+{
+    ;load the buffer with inital (they need to be a dword for this to work)
+    mov eax, [init_value]
+    mov [affectedTest], eax
+
+    push display_text1
+    push console_format
+    call [printf]
+
+    push affectedTest
+    push console_format
+    call [printf]
+
+    push newline
+    push console_format
+    call [printf]
+
+    push display_text2
+    push console_format
+    call [printf]
+
+    push console_input
+    push console_format
+    call [scanf]
+
+    push display_text3
+    push console_format
+    call [printf]
+
+    push affectedTest
+    push console_format
+    call [printf]
+
+    push 0
+    call [ExitProcess]
+}
+```
+
+which will output something like this
+```
+The varible contains the following: 
+ABC
+Enter a text please into our 6 byte buffer :)
+please dont exeed out 6 byte limit pls
+>hello
+The varible now contains:
+ABC
+```
+as out input was within the 6 byte buffer the varible hasnt changed
+but if we instead of `hello` we input like `hello-world`
+```
+The varible contains the following: 
+ABC
+Enter a text please into our 6 byte buffer :)
+please dont exeed out 6 byte limit pls
+>hello-world
+The varible now contains:
+world
+```
+
+as you can see it overflowed into the next buffer
+the reason i used `-` and not ` ` is because scanf only takes till whitespace and puts the rest in a buffer for other scanf's to take from or something along those lines
+anyways thats pretty much it
