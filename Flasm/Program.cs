@@ -33,18 +33,19 @@ internal class Program
         //    push 0
         //    call [ExitProcess]
         //}
-        
+
         //""";
 
         //File.WriteAllText("input.flasm", code);
 
 
+        string? filename = null;
         try
         {
             string input = File.ReadAllText("input.flasm");
 
             var pre = new PreAssembler();
-            string preOutput = pre.Parse(input);
+            (string preOutput, filename) = pre.Parse(input);
 
             File.WriteAllText("generated.asm", preOutput);
         }
@@ -53,11 +54,13 @@ internal class Program
             Console.WriteLine(ex.Message.ToString());
         }
 
+        filename ??= "output.exe";
+
         var assembler = new Assembler();
         try
         {
             var output = assembler.AssembleFile("generated.asm");
-            File.WriteAllBytes("output.exe", output);
+            File.WriteAllBytes(filename, output);
         }
         catch (FasmException ex)
         {

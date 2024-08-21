@@ -9,6 +9,7 @@ namespace FriedAssembler;
 public class PreAssembler : AnalizerBase<char>
 {
     private static readonly string IncludeDataSegmentMarker = ";%includeData$egmentMarker%";
+    private static readonly string ExportDataSegmentMarker = ";%exportData$egmentMarker%";
     private static readonly string MutableDataSegmentMarker = ";%mutableData$egmentMarker%";
     private static readonly string BufferDataSegmentMarker = ";%bufferData$egmentMarker%";
     private static readonly string ConstDataSegmentMarker = ";%constData$egmentMarker%";
@@ -29,11 +30,13 @@ public class PreAssembler : AnalizerBase<char>
     string EntryCode = string.Empty;
     string EntryName = string.Empty;
     string Format = string.Empty;
+    string? FileName = null;
 
     bool useMutable = false;
     bool useConst = false;
     bool useBuffer = false;
     bool useIncludes = false;
+    bool useExports = false;
 
     public class Varible
     {
@@ -54,7 +57,7 @@ public class PreAssembler : AnalizerBase<char>
     }
     List<Varible> Varibles = new List<Varible>();
 
-    public string Parse(string input) 
+    public (string, string?) Parse(string input) 
     {
         input = "\n" + input + "\n";
         this.Analizable = input.ToList();
@@ -104,7 +107,7 @@ public class PreAssembler : AnalizerBase<char>
         this.Analizable = input.ToList();
         this.Position = 0;
 
-        return input;
+        return (input, FileName);
     }
 
     //generates regions
@@ -121,6 +124,7 @@ public class PreAssembler : AnalizerBase<char>
                 ".bss" => "section '.bss' readable writeable \n" + BufferDataSegmentMarker,
                 ".cdata" => "section '.cdata' data readable \n" + ConstDataSegmentMarker,
                 ".idata" => "section '.idata' import data readable writeable \n" + IncludeDataSegmentMarker,
+                ".edata" => "section '.edata' export data readable \n" + ExportDataSegmentMarker,
                 ".reloc" => "section '.reloc' fixups data readable discardable\t; needed for Win32s",
                 _ => throw new Exception($"Segment `{segmentName}` Does not exist, did you mean `.text` or `.idata`?")
             };
@@ -162,6 +166,9 @@ public class PreAssembler : AnalizerBase<char>
         if (useIncludes)
             AddSegmentIfMissing(".idata");
 
+        if (useExports)
+            AddSegmentIfMissing(".edata");
+
         AddSegmentIfMissing(".reloc");
 
         return output;
@@ -174,6 +181,7 @@ public class PreAssembler : AnalizerBase<char>
         {
             if (FindStart("entry "))
             {
+                int fallBackPosition = Position;
                 string entryName = TryConsumeUntil('(');
                 if (entryName is not null)
                 {
@@ -194,6 +202,11 @@ public class PreAssembler : AnalizerBase<char>
                     //we have captured the code
                     EntryName = entryName;
                     EntryCode = $"{entryName}:\n{code}";
+                }
+                else
+                { 
+                    output += "entry ";
+                    this.Position = fallBackPosition;
                 }
             }
             output += Current;
@@ -227,6 +240,10 @@ public class PreAssembler : AnalizerBase<char>
             if (FindStart("#format "))
             {
                 Format = ConsumeUntilEnter();
+            }
+            if (FindStart("#output "))
+            {
+                FileName = ConsumeUntilEnter();
             }
             output += Current;
             Position++;
