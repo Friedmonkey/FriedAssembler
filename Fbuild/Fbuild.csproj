@@ -37,6 +37,265 @@
 
   <ItemGroup>
     <None Remove="C:\Users\marti\.nuget\packages\reloaded.assembler\1.0.16\build\FASM.DLL" />
+    <None Remove="INCLUDE\API\ADVAPI32.INC" />
+    <None Remove="INCLUDE\API\COMCTL32.INC" />
+    <None Remove="INCLUDE\API\COMDLG32.INC" />
+    <None Remove="INCLUDE\API\GDI32.INC" />
+    <None Remove="INCLUDE\API\KERNEL32.INC" />
+    <None Remove="INCLUDE\API\SHELL32.INC" />
+    <None Remove="INCLUDE\API\USER32.INC" />
+    <None Remove="INCLUDE\API\WSOCK32.INC" />
+    <None Remove="INCLUDE\ENCODING\UTF8.INC" />
+    <None Remove="INCLUDE\ENCODING\WIN1250.INC" />
+    <None Remove="INCLUDE\ENCODING\WIN1251.INC" />
+    <None Remove="INCLUDE\ENCODING\WIN1252.INC" />
+    <None Remove="INCLUDE\ENCODING\WIN1253.INC" />
+    <None Remove="INCLUDE\ENCODING\WIN1254.INC" />
+    <None Remove="INCLUDE\ENCODING\WIN1255.INC" />
+    <None Remove="INCLUDE\ENCODING\WIN1256.INC" />
+    <None Remove="INCLUDE\ENCODING\WIN1257.INC" />
+    <None Remove="INCLUDE\ENCODING\WIN1258.INC" />
+    <None Remove="INCLUDE\ENCODING\WIN874.INC" />
+    <None Remove="INCLUDE\EQUATES\COMCTL32.INC" />
+    <None Remove="INCLUDE\EQUATES\COMCTL64.INC" />
+    <None Remove="INCLUDE\EQUATES\COMDLG32.INC" />
+    <None Remove="INCLUDE\EQUATES\COMDLG64.INC" />
+    <None Remove="INCLUDE\EQUATES\GDI32.INC" />
+    <None Remove="INCLUDE\EQUATES\GDI64.INC" />
+    <None Remove="INCLUDE\EQUATES\KERNEL32.INC" />
+    <None Remove="INCLUDE\EQUATES\KERNEL64.INC" />
+    <None Remove="INCLUDE\EQUATES\SHELL32.INC" />
+    <None Remove="INCLUDE\EQUATES\SHELL64.INC" />
+    <None Remove="INCLUDE\EQUATES\USER32.INC" />
+    <None Remove="INCLUDE\EQUATES\USER64.INC" />
+    <None Remove="INCLUDE\EQUATES\WSOCK32.INC" />
+    <None Remove="INCLUDE\MACRO\COM32.INC" />
+    <None Remove="INCLUDE\MACRO\COM64.INC" />
+    <None Remove="INCLUDE\MACRO\EXPORT.INC" />
+    <None Remove="INCLUDE\MACRO\IF.INC" />
+    <None Remove="INCLUDE\MACRO\IMPORT32.INC" />
+    <None Remove="INCLUDE\MACRO\IMPORT64.INC" />
+    <None Remove="INCLUDE\MACRO\MASM.INC" />
+    <None Remove="INCLUDE\MACRO\PROC32.INC" />
+    <None Remove="INCLUDE\MACRO\proc64.bin" />
+    <None Remove="INCLUDE\MACRO\PROC64.INC" />
+    <None Remove="INCLUDE\MACRO\RESOURCE.INC" />
+    <None Remove="INCLUDE\MACRO\STRUCT.INC" />
+    <None Remove="INCLUDE\PCOUNT\ADVAPI32.INC" />
+    <None Remove="INCLUDE\PCOUNT\COMCTL32.INC" />
+    <None Remove="INCLUDE\PCOUNT\COMDLG32.INC" />
+    <None Remove="INCLUDE\PCOUNT\GDI32.INC" />
+    <None Remove="INCLUDE\PCOUNT\KERNEL32.INC" />
+    <None Remove="INCLUDE\PCOUNT\SHELL32.INC" />
+    <None Remove="INCLUDE\PCOUNT\USER32.INC" />
+    <None Remove="INCLUDE\PCOUNT\WSOCK32.INC" />
+    <None Remove="INCLUDE\WIN32A.INC" />
+    <None Remove="INCLUDE\WIN32AX.INC" />
+    <None Remove="INCLUDE\WIN32AXP.INC" />
+    <None Remove="INCLUDE\WIN32W.INC" />
+    <None Remove="INCLUDE\WIN32WX.INC" />
+    <None Remove="INCLUDE\WIN32WXP.INC" />
+    <None Remove="INCLUDE\WIN64A.INC" />
+    <None Remove="INCLUDE\WIN64AX.INC" />
+    <None Remove="INCLUDE\WIN64AXP.INC" />
+    <None Remove="INCLUDE\WIN64W.INC" />
+    <None Remove="INCLUDE\WIN64WX.INC" />
+    <None Remove="INCLUDE\WIN64WXP.INC" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="INCLUDE\API\ADVAPI32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\API\COMCTL32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\API\COMDLG32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\API\GDI32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\API\KERNEL32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\API\SHELL32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\API\USER32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\API\WSOCK32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\ENCODING\UTF8.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\ENCODING\WIN1250.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\ENCODING\WIN1251.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\ENCODING\WIN1252.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\ENCODING\WIN1253.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\ENCODING\WIN1254.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\ENCODING\WIN1255.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\ENCODING\WIN1256.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\ENCODING\WIN1257.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\ENCODING\WIN1258.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\ENCODING\WIN874.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\EQUATES\COMCTL32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\EQUATES\COMCTL64.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\EQUATES\COMDLG32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\EQUATES\COMDLG64.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\EQUATES\GDI32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\EQUATES\GDI64.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\EQUATES\KERNEL32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\EQUATES\KERNEL64.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\EQUATES\SHELL32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\EQUATES\SHELL64.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\EQUATES\USER32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\EQUATES\USER64.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\EQUATES\WSOCK32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\MACRO\COM32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\MACRO\COM64.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\MACRO\EXPORT.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\MACRO\IF.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\MACRO\IMPORT32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\MACRO\IMPORT64.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\MACRO\MASM.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\MACRO\PROC32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\MACRO\proc64.bin">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\MACRO\PROC64.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\MACRO\RESOURCE.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\MACRO\STRUCT.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\PCOUNT\ADVAPI32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\PCOUNT\COMCTL32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\PCOUNT\COMDLG32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\PCOUNT\GDI32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\PCOUNT\KERNEL32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\PCOUNT\SHELL32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\PCOUNT\USER32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\PCOUNT\WSOCK32.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\WIN32A.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\WIN32AX.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\WIN32AXP.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\WIN32W.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\WIN32WX.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\WIN32WXP.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\WIN64A.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\WIN64AX.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\WIN64AXP.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\WIN64W.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\WIN64WX.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="INCLUDE\WIN64WXP.INC">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
