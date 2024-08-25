@@ -30,7 +30,7 @@ namespace FbuildSetupInstallerClassHolder
                 //File.WriteAllText(Path.Combine(path,"hiGuys.txt"),"hello world");
 
                 this.SetEnvironmentVarible("Path", path, false);
-                this.SetEnvironmentVarible("Includes", Path.Combine(path, "INCLUDE"), false);
+                this.SetEnvironmentVarible("Include", Path.Combine(path, "INCLUDE"), false);
             }
             catch 
             {
@@ -46,7 +46,7 @@ namespace FbuildSetupInstallerClassHolder
                 path = path.Substring(0, path.Length - 1);
 
                 this.SetEnvironmentVarible("Path", path, true);
-                this.SetEnvironmentVarible("Includes", Path.Combine(path, "INCLUDE"), true);
+                this.SetEnvironmentVarible("Include", Path.Combine(path, "INCLUDE"), true);
             }
             catch
             {
@@ -68,7 +68,7 @@ namespace FbuildSetupInstallerClassHolder
         public void SetEnvironmentVarible(string varible, string FriedPath, bool remove)
         {
             //get the paths AND make a backup
-            string paths = Environment.GetEnvironmentVariable("Path", EnvironmentVariableTarget.Machine);
+            string paths = Environment.GetEnvironmentVariable(varible, EnvironmentVariableTarget.Machine);
             string date = DateTime.Now.ToString("g").Replace("/", "-").Replace(":", ";");
 
             var backupPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, varible+"Backups");
@@ -89,7 +89,7 @@ namespace FbuildSetupInstallerClassHolder
                 Context.LogMessage(newPaths);
 
                 //Directory.Delete(FriedPath, true);
-                Environment.SetEnvironmentVariable("Path", newPaths, EnvironmentVariableTarget.Machine);
+                Environment.SetEnvironmentVariable(varible, newPaths, EnvironmentVariableTarget.Machine);
             }
             else
             {
@@ -97,7 +97,7 @@ namespace FbuildSetupInstallerClassHolder
                 string newPaths = $"{paths};{FriedPath}";
                 Context.LogMessage(newPaths);
 
-                Environment.SetEnvironmentVariable("Path", newPaths, EnvironmentVariableTarget.Machine);
+                Environment.SetEnvironmentVariable(varible, newPaths, EnvironmentVariableTarget.Machine);
                 //Directory.CreateDirectory(FriedPath);
             }
         }
